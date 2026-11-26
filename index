@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DocsBR" />
+  <meta name="theme-color" content="#1351B4" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <title>DocsBR</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :root {
+      --blue:        #1351B4;
+      --blue-dark:   #0C3B82;
+      --blue-light:  #2670E8;
+      --blue-faint:  #EEF3FC;
+      --gold:        #FFCD07;
+      --green:       #168821;
+      --bg:          #F2F5FA;
+      --card:        #FFFFFF;
+      --text:        #0D1B2A;
+      --text-sec:    #4A5568;
+      --text-muted:  #8896A7;
+      --border:      #D8E2EE;
+      --shadow:      0 2px 14px rgba(13,27,42,0.09);
+      --safe-top:    env(safe-area-inset-top,    0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left:   env(safe-area-inset-left,   0px);
+      --safe-right:  env(safe-area-inset-right,  0px);
+      --hdr:         56px;
+      --nav:         64px;
+      --font:        'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+      --mono:        'Roboto Mono', 'Courier New', monospace;
+    }
+    html, body {
+      height: 100%; width: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── App Shell ── */
+    #app {
+      display: flex; flex-direction: column;
+      height: 100%; width: 100%;
+      padding-top:    var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+      padding-left:   var(--safe-left);
+      padding-right:  var(--safe-right);
+    }
+
+    /* ── Header ── */
+    #hdr {
+      flex-shrink: 0;
+      height: var(--hdr);
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+      z-index: 200;
+    }
+    .hdr-left { display: flex; align-items: center; gap: 10px; }
+    .hdr-emblem {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hdr-emblem svg { width: 18px; height: 18px; }
+    .hdr-titles { display: flex; flex-direction: column; line-height: 1.15; }
+    .hdr-titles .ht-main {
+      font-size: 15px; font-weight: 800;
+      color: #fff; letter-spacing: 0.2px;
+    }
+    .hdr-titles .ht-sub {
+      font-size: 10px; font-weight: 500;
+      color: rgba(255,255,255,0.68);
+      text-transform: uppercase; letter-spacing: 0.7px;
+    }
+    /* Language toggle */
+    #lang-wrap {
+      display: flex; align-items: center;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 20px;
+      padding: 3px 4px; gap: 2px;
+    }
+    #lang-wrap button {
+      background: none; border: none;
+      color: rgba(255,255,255,0.6);
+      font-family: var(--font);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 8px; border-radius: 14px;
+      cursor: pointer; transition: all 0.18s;
+    }
+    #lang-wrap button.on {
+      background: #fff; color: var(--blue);
+    }
+
+    /* ── Screens ── */
+    #screens { flex: 1; overflow: hidden; position: relative; }
+    .screen {
+      position: absolute; inset: 0;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      display: none; flex-direction: column;
+      background: var(--bg);
+    }
+    .screen.on { display: flex; }
+    .screen::-webkit-scrollbar { display: none; }
+    .screen { -ms-overflow-style: none; scrollbar-width: none; }
+    .screen-pad { padding: 18px 16px 24px; }
+
+    /* ── Bottom Nav ── */
+    #bnav {
+      flex-shrink: 0; height: var(--nav);
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: stretch;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.07);
+      z-index: 200;
+    }
+    .ni {
+      flex: 1; display: flex;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 4px; cursor: pointer;
+      border: none; background: none;
+      position: relative; transition: background 0.12s;
+    }
+    .ni:active { background: rgba(19,81,180,0.05); }
+    .ni-icon {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ni-icon svg { width: 20px; height: 20px; fill: var(--text-muted); transition: fill 0.18s; }
+    .ni-lbl {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-muted); letter-spacing: 0.3px;
+      transition: color 0.18s;
+    }
+    .ni.on .ni-icon svg { fill: var(--blue); }
+    .ni.on .ni-lbl { color: var(--blue); }
+    .ni.on::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 26px; height: 3px;
+      background: var(--blue);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* ── Home ── */
+    .hero-card {
+      background: linear-gradient(140deg, var(--blue-dark) 0%, var(--blue-light) 100%);
+      border-radius: 16px;
+      padding: 22px 20px;
+      margin-bottom: 22px;
+      box-shadow: 0 6px 24px rgba(19,81,180,0.28);
+      position: relative; overflow: hidden;
+    }
+    .hero-card::after {
+      content: '';
+      position: absolute; right: -20px; top: -20px;
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.65);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .hero-name {
+      font-size: 21px; font-weight: 800;
+      color: #fff; line-height: 1.2;
+      margin-bottom: 14px; letter-spacing: -0.2px;
+    }
+    .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .hero-tag {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 11px;
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.88);
+    }
+    .hero-tag.g {
+      background: rgba(22,136,33,0.45);
+      border-color: rgba(22,136,33,0.55);
+    }
+
+    .sec-label {
+      font-size: 10.5px; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    /* Doc cards — uniform */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px; margin-bottom: 22px;
+    }
+    .dc {
+      background: var(--card);
+      border-radius: 13px;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: transform 0.13s, box-shadow 0.13s;
+      display: flex; flex-direction: column; gap: 7px;
+      position: relative;
+    }
+    .dc:active { transform: scale(0.97); box-shadow: none; }
+    .dc::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--blue);
+      border-radius: 13px 13px 0 0;
+    }
+    .dc-label {
+      font-size: 11px; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.9px;
+    }
+    .dc-name {
+      font-size: 15px; font-weight: 800;
+      color: var(--text); letter-spacing: -0.1px;
+    }
+    .dc-num {
+      font-family: var(--mono);
+      font-size: 11px; color: var(--text-sec);
+    }
+    .dc-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #E8F5E9; color: var(--green);
+      font-size: 10px; font-weight: 700;
+      padding: 3px 8px; border-radius: 20px;
+      align-self: flex-start; margin-top: auto;
+    }
+    .dc-arrow {
+      position: absolute; right: 13px; bottom: 13px;
+      font-size: 15px; color: var(--text-muted); opacity: 0.4;
+      font-family: var(--font);
+    }
+
+    .info-box {
+      background: var(--card);
+      border-radius: 12px;
+      border-left: 4px solid var(--blue);
+      padding: 14px 15px;
+      box-shadow: var(--shadow);
+      font-size: 12.5px; color: var(--text-sec);
+      line-height: 1.55;
+    }
+    .info-box strong { color: var(--blue); font-weight: 700; }
+
+    /* ── Document Viewer ── */
+    .viewer-screen {
+      padding: 0 !important;
+      background: #080C12 !important;
+    }
+    .vhdr {
+      flex-shrink: 0; height: 52px;
+      background: rgba(8,12,18,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex; align-items: center;
+      padding: 0 14px; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
+    .vback {
+      background: none; border: none;
+      color: #fff; font-size: 26px; font-weight: 300;
+      cursor: pointer; padding: 2px 6px;
+      border-radius: 8px; line-height: 1;
+      font-family: var(--font);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .vback:active { background: rgba(255,255,255,0.1); }
+    .vinfo { flex: 1; }
+    .vinfo-title {
+      font-size: 14px; font-weight: 700;
+      color: #fff; letter-spacing: 0.1px;
+    }
+    .vinfo-sub {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+    }
+    .vpager {
+      font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      font-family: var(--mono);
+    }
+    .vswipe {
+      flex: 1; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .vslides {
+      display: flex; height: 100%; width: 100%;
+      transition: transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94);
+      will-change: transform;
+    }
+    .vslide {
+      flex-shrink: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px;
+    }
+    .vslide img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      border-radius: 7px;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.65);
+      display: block;
+    }
+    .vdots {
+      flex-shrink: 0; height: 38px;
+      display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+    .vdot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.28);
+      transition: background 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .vdot.on { background: #fff; transform: scale(1.35); }
+
+    /* ── Profile ── */
+    .p-hero {
+      background: linear-gradient(140deg, var(--blue-dark) 0%, var(--blue-light) 100%);
+      border-radius: 16px;
+      padding: 22px 18px;
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(19,81,180,0.28);
+    }
+    .p-avatar {
+      width: 68px; height: 68px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.45);
+      overflow: hidden; flex-shrink: 0;
+      background: rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .p-avatar-placeholder {
+      font-size: 28px; color: rgba(255,255,255,0.6);
+      font-weight: 700;
+    }
+    .p-name {
+      font-size: 18px; font-weight: 800;
+      color: #fff; line-height: 1.2;
+      letter-spacing: -0.2px;
+    }
+    .p-nation {
+      font-size: 11px; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-top: 3px;
+    }
+    .p-verified {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 9px;
+      background: rgba(22,136,33,0.45);
+      border: 1px solid rgba(22,136,33,0.55);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 11px; font-weight: 700; color: #fff;
+    }
+    .p-verified svg { width: 11px; height: 11px; fill: #fff; }
+
+    .icard {
+      background: var(--card);
+      border-radius: 13px;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden; margin-bottom: 13px;
+    }
+    .icard-hdr {
+      background: var(--blue);
+      padding: 9px 16px;
+      font-size: 10.5px; font-weight: 700;
+      color: rgba(255,255,255,0.8);
+      text-transform: uppercase; letter-spacing: 0.9px;
+    }
+    .irow {
+      display: flex; justify-content: space-between;
+      align-items: flex-start;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .irow:last-child { border-bottom: none; }
+    .irow-lbl {
+      font-size: 10.5px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      flex-shrink: 0; margin-right: 14px;
+    }
+    .irow-val {
+      font-size: 13px; font-weight: 600;
+      color: var(--text); text-align: right;
+    }
+    .irow-val.mono {
+      font-family: var(--mono);
+      font-size: 12.5px; font-weight: 500;
+    }
+
+    /* ── Landscape ── */
+    @media (orientation: landscape) {
+      :root { --hdr: 44px; --nav: 50px; }
+      .doc-grid { grid-template-columns: repeat(4, 1fr); }
+      .vslide { padding: 6px 10px; }
+      .hero-card { margin-bottom: 14px; padding: 16px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="hdr">
+    <div class="hdr-left">
+      <div class="hdr-emblem">
+        <!-- Brazilian star emblem SVG -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="#0C3B82" stroke="#0C3B82" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="hdr-titles">
+        <span class="ht-main">gov.br</span>
+        <span class="ht-sub" data-i18n="hdr_sub">Digital Documents</span>
+      </div>
+    </div>
+    <div id="lang-wrap">
+      <button id="btn-en" class="on" onclick="setLang('en')">EN</button>
+      <button id="btn-pt" onclick="setLang('pt')">PT</button>
+    </div>
+  </header>
+
+  <!-- SCREENS -->
+  <div id="screens">
+
+    <!-- HOME -->
+    <div class="screen on screen-pad" id="s-home">
+      <div class="hero-card">
+        <div class="hero-eyebrow" data-i18n="h_eyebrow">Welcome back</div>
+        <div class="hero-name">Leonardo Pereira Max</div>
+        <div class="hero-tags">
+          <span class="hero-tag" data-i18n="h_tag1">Brazilian Citizen</span>
+          <span class="hero-tag g" data-i18n="h_tag2">4 Documents Active</span>
+        </div>
+      </div>
+
+      <div class="sec-label" data-i18n="h_sec1">My Documents</div>
+      <div class="doc-grid">
+
+        <div class="dc" onclick="openDoc('cnh')">
+          <div class="dc-label">CNH</div>
+          <div class="dc-name" data-i18n="d_cnh">Driver License</div>
+          <div class="dc-num">09002295179</div>
+          <div class="dc-badge" data-i18n="d_active">Active</div>
+          <div class="dc-arrow">&#8250;</div>
+        </div>
+
+        <div class="dc" onclick="openDoc('rg')">
+          <div class="dc-label">RG</div>
+          <div class="dc-name" data-i18n="d_rg">Identity Card</div>
+          <div class="dc-num">55.245.585-4</div>
+          <div class="dc-badge" data-i18n="d_active">Active</div>
+          <div class="dc-arrow">&#8250;</div>
+        </div>
+
+        <div class="dc" onclick="openDoc('passport')">
+          <div class="dc-label" data-i18n="d_pass_lbl">Passport</div>
+          <div class="dc-name" data-i18n="d_pass">Passaporte</div>
+          <div class="dc-num">GG417560</div>
+          <div class="dc-badge" data-i18n="d_active">Active</div>
+          <div class="dc-arrow">&#8250;</div>
+        </div>
+
+        <div class="dc" onclick="openDoc('cpf')">
+          <div class="dc-label">CPF</div>
+          <div class="dc-name" data-i18n="d_cpf">Tax Registry</div>
+          <div class="dc-num">592.550.918-83</div>
+          <div class="dc-badge" data-i18n="d_active">Active</div>
+          <div class="dc-arrow">&#8250;</div>
+        </div>
+
+      </div>
+
+      <div class="sec-label" data-i18n="h_sec2">Notice</div>
+      <div class="info-box">
+        <strong data-i18n="ib_title">Secure Digital Wallet</strong><br>
+        <span data-i18n="ib_body">Documents are stored locally on this device. Tap any card to view or present your document.</span>
+      </div>
+    </div>
+
+    <!-- CNH VIEWER -->
+    <div class="screen viewer-screen" id="s-cnh">
+      <div class="vhdr">
+        <button class="vback" onclick="closeDoc()">&#8249;</button>
+        <div class="vinfo">
+          <div class="vinfo-title">Carteira Nacional de Habilitacao</div>
+          <div class="vinfo-sub">Leonardo Pereira Max — Cat. B</div>
+        </div>
+        <div class="vpager" id="pi-cnh">1 / 4</div>
+      </div>
+      <div class="vswipe" id="sw-cnh">
+        <div class="vslides" id="sl-cnh">
+          <div class="vslide"><img src="CNH_page-0001.jpg" alt="CNH p1" /></div>
+          <div class="vslide"><img src="CNH_page-0002.jpg" alt="CNH p2" /></div>
+          <div class="vslide"><img src="CNH_page-0003.jpg" alt="CNH p3" /></div>
+          <div class="vslide"><img src="CNH_page-0004.jpg" alt="CNH p4" /></div>
+        </div>
+      </div>
+      <div class="vdots" id="dt-cnh"></div>
+    </div>
+
+    <!-- RG VIEWER -->
+    <div class="screen viewer-screen" id="s-rg">
+      <div class="vhdr">
+        <button class="vback" onclick="closeDoc()">&#8249;</button>
+        <div class="vinfo">
+          <div class="vinfo-title">Carteira de Identidade — RG</div>
+          <div class="vinfo-sub">Leonardo Pereira Max — SSP-SP</div>
+        </div>
+        <div class="vpager" id="pi-rg">1 / 2</div>
+      </div>
+      <div class="vswipe" id="sw-rg">
+        <div class="vslides" id="sl-rg">
+          <div class="vslide"><img src="CPF_page-0001.jpg" alt="RG p1" /></div>
+          <div class="vslide"><img src="CPF_page-0002.jpg" alt="RG p2" /></div>
+        </div>
+      </div>
+      <div class="vdots" id="dt-rg"></div>
+    </div>
+
+    <!-- CPF VIEWER -->
+    <div class="screen viewer-screen" id="s-cpf">
+      <div class="vhdr">
+        <button class="vback" onclick="closeDoc()">&#8249;</button>
+        <div class="vinfo">
+          <div class="vinfo-title">Cadastro de Pessoa Fisica — CPF</div>
+          <div class="vinfo-sub">592.550.918-83</div>
+        </div>
+        <div class="vpager" id="pi-cpf">1 / 2</div>
+      </div>
+      <div class="vswipe" id="sw-cpf">
+        <div class="vslides" id="sl-cpf">
+          <div class="vslide"><img src="CPF_page-0001.jpg" alt="CPF p1" /></div>
+          <div class="vslide"><img src="CPF_page-0002.jpg" alt="CPF p2" /></div>
+        </div>
+      </div>
+      <div class="vdots" id="dt-cpf"></div>
+    </div>
+
+    <!-- PASSPORT VIEWER -->
+    <div class="screen viewer-screen" id="s-passport">
+      <div class="vhdr">
+        <button class="vback" onclick="closeDoc()">&#8249;</button>
+        <div class="vinfo">
+          <div class="vinfo-title">Passaporte — Passport</div>
+          <div class="vinfo-sub">Leonardo Pereira Max — GG417560</div>
+        </div>
+        <div class="vpager" id="pi-passport">1 / 2</div>
+      </div>
+      <div class="vswipe" id="sw-passport">
+        <div class="vslides" id="sl-passport">
+          <div class="vslide"><img src="PASSPORT_page-0001.jpg" alt="Passport p1" /></div>
+          <div class="vslide"><img src="PASSPORT_page-0002.jpg" alt="Passport p2" /></div>
+        </div>
+      </div>
+      <div class="vdots" id="dt-passport"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="screen screen-pad" id="s-profile">
+      <div class="p-hero">
+        <div class="p-avatar">
+          <span class="p-avatar-placeholder">LP</span>
+        </div>
+        <div>
+          <div class="p-name">Leonardo<br>Pereira Max</div>
+          <div class="p-nation" data-i18n="p_nation">Brazilian Citizen</div>
+          <div class="p-verified">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span data-i18n="p_verified">Verified Identity</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-label" data-i18n="p_sec1">Personal Information</div>
+      <div class="icard">
+        <div class="icard-hdr" data-i18n="p_id_hdr">Identification</div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_fullname">Full Name</span>
+          <span class="irow-val">Leonardo Pereira Max</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_dob">Date of Birth</span>
+          <span class="irow-val">12/11/2003</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_sex">Sex</span>
+          <span class="irow-val" data-i18n="p_sex_v">Male</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_nat">Nationality</span>
+          <span class="irow-val">Brasileiro(a)</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_pob">Place of Birth</span>
+          <span class="irow-val">Sao Paulo, SP</span>
+        </div>
+      </div>
+
+      <div class="sec-label" data-i18n="p_sec2">Document Numbers</div>
+      <div class="icard">
+        <div class="icard-hdr" data-i18n="p_docs_hdr">Registry</div>
+        <div class="irow">
+          <span class="irow-lbl">CPF</span>
+          <span class="irow-val mono">592.550.918-83</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl">RG</span>
+          <span class="irow-val mono">55.245.585-4</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl">CNH</span>
+          <span class="irow-val mono">09002295179</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_pass_lbl">Passport</span>
+          <span class="irow-val mono">GG417560</span>
+        </div>
+      </div>
+
+      <div class="sec-label" data-i18n="p_sec3">Filiation</div>
+      <div class="icard">
+        <div class="icard-hdr" data-i18n="p_fil_hdr">Parents</div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_father">Father</span>
+          <span class="irow-val">Alexandre Max</span>
+        </div>
+        <div class="irow">
+          <span class="irow-lbl" data-i18n="p_mother">Mother</span>
+          <span class="irow-val">Denise Alonso Pereira Max</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="bnav">
+    <button class="ni on" data-screen="home" onclick="navTo('home',this)">
+      <div class="ni-icon">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </div>
+      <span class="ni-lbl" data-i18n="n_home">Home</span>
+    </button>
+    <button class="ni" data-screen="cnh" onclick="navTo('cnh',this)">
+      <div class="ni-icon">
+        <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+      </div>
+      <span class="ni-lbl">CNH</span>
+    </button>
+    <button class="ni" data-screen="rg" onclick="navTo('rg',this)">
+      <div class="ni-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm4-4h8v2h-8z"/></svg>
+      </div>
+      <span class="ni-lbl">RG</span>
+    </button>
+    <button class="ni" data-screen="passport" onclick="navTo('passport',this)">
+      <div class="ni-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><circle cx="12" cy="10" r="3"/><path d="M7.07 17c.43-2.6 2.72-4.58 5.43-4.58s5 1.98 5.43 4.58H7.07z"/></svg>
+      </div>
+      <span class="ni-lbl" data-i18n="n_pass">Passport</span>
+    </button>
+    <button class="ni" data-screen="profile" onclick="navTo('profile',this)">
+      <div class="ni-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      </div>
+      <span class="ni-lbl" data-i18n="n_profile">Profile</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+/* ── i18n ──────────────────────────────────────────────── */
+const T = {
+  en: {
+    hdr_sub:'Digital Documents', h_eyebrow:'Welcome back',
+    h_tag1:'Brazilian Citizen', h_tag2:'4 Documents Active',
+    h_sec1:'My Documents', h_sec2:'Notice',
+    d_cnh:'Driver License', d_rg:'Identity Card',
+    d_pass_lbl:'Passport', d_pass:'Passaporte',
+    d_cpf:'Tax Registry', d_active:'Active',
+    ib_title:'Secure Digital Wallet',
+    ib_body:'Documents are stored locally on this device. Tap any card to view or present your document.',
+    p_nation:'Brazilian Citizen', p_verified:'Verified Identity',
+    p_sec1:'Personal Information', p_id_hdr:'Identification',
+    p_fullname:'Full Name', p_dob:'Date of Birth',
+    p_sex:'Sex', p_sex_v:'Male',
+    p_nat:'Nationality', p_pob:'Place of Birth',
+    p_sec2:'Document Numbers', p_docs_hdr:'Registry',
+    p_pass_lbl:'Passport', p_sec3:'Filiation',
+    p_fil_hdr:'Parents', p_father:'Father', p_mother:'Mother',
+    n_home:'Home', n_pass:'Passport', n_profile:'Profile',
+  },
+  pt: {
+    hdr_sub:'Documentos Digitais', h_eyebrow:'Bem-vindo(a)',
+    h_tag1:'Cidadao Brasileiro', h_tag2:'4 Documentos Ativos',
+    h_sec1:'Meus Documentos', h_sec2:'Aviso',
+    d_cnh:'Carteira de Habilitacao', d_rg:'Carteira de Identidade',
+    d_pass_lbl:'Passaporte', d_pass:'Passaporte',
+    d_cpf:'Cadastro de Pessoa Fisica', d_active:'Ativo',
+    ib_title:'Carteira Digital Segura',
+    ib_body:'Documentos armazenados localmente neste dispositivo. Toque em qualquer cartao para visualizar.',
+    p_nation:'Cidadao Brasileiro', p_verified:'Identidade Verificada',
+    p_sec1:'Informacoes Pessoais', p_id_hdr:'Identificacao',
+    p_fullname:'Nome Completo', p_dob:'Data de Nascimento',
+    p_sex:'Sexo', p_sex_v:'Masculino',
+    p_nat:'Nacionalidade', p_pob:'Naturalidade',
+    p_sec2:'Numeros de Documentos', p_docs_hdr:'Registro',
+    p_pass_lbl:'Passaporte', p_sec3:'Filiacao',
+    p_fil_hdr:'Pais', p_father:'Pai', p_mother:'Mae',
+    n_home:'Inicio', n_pass:'Passaporte', n_profile:'Perfil',
+  }
+};
+function setLang(l) {
+  document.getElementById('btn-en').classList.toggle('on', l==='en');
+  document.getElementById('btn-pt').classList.toggle('on', l==='pt');
+  const t = T[l];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k] != null) el.textContent = t[k];
+  });
+}
+
+/* ── Navigation ────────────────────────────────────────── */
+let activeDoc = null;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById('s-' + id).classList.add('on');
+}
+function navTo(id, btn) {
+  showScreen(id);
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  btn.classList.add('on');
+  activeDoc = null;
+}
+function openDoc(id) {
+  showScreen(id);
+  activeDoc = id;
+  setSlide(id, 0);
+}
+function closeDoc() {
+  showScreen('home');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  document.querySelector('.ni[data-screen="home"]').classList.add('on');
+  activeDoc = null;
+}
+
+/* ── Swipe Viewer ──────────────────────────────────────── */
+const V = {
+  cnh:      { n: 4, cur: 0 },
+  rg:       { n: 2, cur: 0 },
+  cpf:      { n: 2, cur: 0 },
+  passport: { n: 2, cur: 0 }
+};
+
+function buildDots(id) {
+  const v = V[id];
+  const c = document.getElementById('dt-' + id);
+  c.innerHTML = '';
+  for (let i = 0; i < v.n; i++) {
+    const d = document.createElement('div');
+    d.className = 'vdot' + (i===0?' on':'');
+    d.onclick = () => setSlide(id, i);
+    c.appendChild(d);
+  }
+}
+function setSlide(id, i) {
+  const v = V[id];
+  v.cur = Math.max(0, Math.min(i, v.n - 1));
+  const sl = document.getElementById('sl-' + id);
+  if (sl) sl.style.transform = `translateX(-${v.cur * 100}%)`;
+  document.querySelectorAll(`#dt-${id} .vdot`).forEach((d,j) =>
+    d.classList.toggle('on', j===v.cur));
+  const pi = document.getElementById('pi-' + id);
+  if (pi) pi.textContent = `${v.cur+1} / ${v.n}`;
+}
+function initSwipe(id) {
+  const area = document.getElementById('sw-' + id);
+  if (!area) return;
+  let x0=0, y0=0;
+  area.addEventListener('touchstart', e => {
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, {passive:true});
+  area.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 38) {
+      setSlide(id, V[id].cur + (dx < 0 ? 1 : -1));
+    }
+  }, {passive:true});
+}
+
+Object.keys(V).forEach(id => { buildDots(id); initSwipe(id); });
+
+document.addEventListener('keydown', e => {
+  if (!activeDoc) return;
+  if (e.key==='ArrowRight') setSlide(activeDoc, V[activeDoc].cur+1);
+  if (e.key==='ArrowLeft')  setSlide(activeDoc, V[activeDoc].cur-1);
+  if (e.key==='Escape')     closeDoc();
+});
+</script>
+</body>
+</html>
